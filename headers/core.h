@@ -5,7 +5,8 @@
 template<typename T>
 T* Instantiate(T* to)
 {
-	return new T(30);
+	T* n = to;
+	return n;
 }
 
 class WorldObject
@@ -44,11 +45,9 @@ public:
 class Block : public WorldObject
 {
 protected:
-	Cube* cube;
 
 public:
-	Transform transform;
-	
+	Cube* cube;
 	static vector<Block*> ActiveBlocks;
 
 	void Start()

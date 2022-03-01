@@ -30,6 +30,7 @@
 #define uint unsigned int
 #define onevec vec3(1,1,1)
 #define zerovec vec3(0,0,0)
+#define zeroqua qua(0,0,0,0)
 #define cstring const char*
 
 static bool glPrintErrors(const char* function, const char* file, int line)
@@ -232,9 +233,15 @@ void ViewResizeCallback(GLFWwindow* window, int w, int h)
 	glViewport(0, 0, width, height);
 }
 
-void MouseCallback(GLFWwindow* window, double x, double y)
+float MouseX, MouseY;
+
+float lastX, lastY;
+bool firstMouse = true;
+
+void MouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 {
 
+	
 }
 
 void MSetupMemoryChecks()
@@ -330,7 +337,7 @@ class Transform
 public:
 
 	vec3 position = zerovec;
-	vec3 euler = zerovec;
+	quat rotation = quat(0,0,0,0);
 	vec3 scale = zerovec;
 
 	mat4 model = mat4(1.0f);
@@ -343,20 +350,20 @@ public:
 	{
 		if (BelongsToCamera)
 		{
-			forward.x = cos(euler.x) * sin(-euler.y);
-			forward.y = sin(euler.x);
-			forward.z = cos(euler.x) * cos(-euler.y);
+			forward.x = cos(rotation.x) * sin(-rotation.y);
+			forward.y = sin(rotation.x);
+			forward.z = cos(rotation.x) * cos(-rotation.y);
 		}
 		else
 		{
-			forward.x = cos(euler.x) * sin(euler.y);
-			forward.y = sin(euler.x);
-			forward.z = cos(euler.x) * cos(euler.y);
+			forward.x = cos(rotation.x) * sin(rotation.y);
+			forward.y = sin(rotation.x);
+			forward.z = cos(rotation.x) * cos(rotation.y);
 		}
 
-		right.x = cos(euler.y);
+		right.x = cos(rotation.y);
 		right.y = 0;
-		right.z = sin(euler.y);
+		right.z = sin(rotation.y);
 
 		up = cross(forward, right);
 	}
@@ -365,9 +372,9 @@ public:
 	{
 		model = translate(model, -position);
 
-		model = rotate(model, euler.x, vec3(1, 0, 0));
-		model = rotate(model, euler.y, vec3(0, 1, 0));
-		model = rotate(model, euler.z, vec3(0, 0, 1));
+		model = rotate(model, rotation.x, vec3(1, 0, 0));
+		model = rotate(model, rotation.y, vec3(0, 1, 0));
+		model = rotate(model, rotation.z, vec3(0, 0, 1));
 		
 		model = glm::scale(model, scale);
 	}
@@ -637,22 +644,46 @@ public:
 			position.y -= speed * deltaTime;
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_C))
+		double xposIn, yposIn;
+		glfwGetCursorPos(window, &xposIn, &yposIn);
+
+		float xpos = static_cast<float>(xposIn);
+		float ypos = static_cast<float>(yposIn);
+
+
+		float xoffset = xpos - lastX;
+		float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+		lastX = xpos;
+		lastY = ypos;
+		
+
+		float sensitivity = 0.005f; // change this value to your liking
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
+
+		MouseX = xoffset;
+		MouseY = yoffset;
+
+		rotation.x += forward.y + xoffset;
+		rotation.z += right.z + -yoffset;
+
+
+		/*if (glfwGetKey(window, GLFW_KEY_C))
 		{
-			euler.y += speed * deltaTime;
+			rotation.y += speed * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_Z))
 		{
-			euler.y -= speed * deltaTime;
-		}
+			rotation.y -= speed * deltaTime;
+		}*/
 	}
 
 	void UpdateCameraMatrices()
 	{
-		view = rotate(view, euler.x, vec3(0, 0, 1));
-		view = rotate(view, euler.y, vec3(0, 1, 0));
-		view = rotate(view, euler.z, vec3(1, 0, 0));
+		view = rotate(view, rotation.x, vec3(0, 0, 1));
+		view = rotate(view, rotation.y, vec3(0, 1, 0));
+		view = rotate(view, rotation.z, vec3(1, 0, 0));
 
 		view = translate(view, -position);
 		projection = perspective(radians(FieldOfView), float((width * 0.75) / (height * 0.75)), NearClip, FarClip);
@@ -785,7 +816,6 @@ Texture* LoadTexture(string path, GLenum target)
 	if (numChannels == 4) format = GL_RGBA;
 
 	glCall(tex->GenerateTexture(target, 0, GL_RGB, width, height, format, GL_UNSIGNED_BYTE, data, true));
-	cout << numChannels << endl;
 	stbi_image_free(data);
 	return tex;
 }
@@ -805,7 +835,6 @@ public:
 		if (mode == 0)
 		{
 			VertShader.CreateShader();
-			cout << SHADERS_DIRECTORY + string("vertex.glsl") << endl;
 			VertShader.LinkCodeWithPath(SHADERS_DIRECTORY + string("vertexTextured.glsl"));
 			VertShader.Compile();
 

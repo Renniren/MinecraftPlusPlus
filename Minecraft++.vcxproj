@@ -88,10 +88,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\KHR;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glm;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\GLFW;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glad;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\libaries;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -102,12 +104,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\KHR;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glm;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\GLFW;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glad;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\libaries;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -116,12 +120,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glad;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\GLFW;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glm;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\KHR;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\KHR;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glm;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\GLFW;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glad;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glad;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\GLFW;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glm;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\KHR;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\libaries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\libaries;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\libaries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -133,14 +137,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glad;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\GLFW;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glm;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\KHR;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\KHR;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glm;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\GLFW;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers\glad;C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\headers;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glad;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\GLFW;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\glm;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers\KHR;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\libaries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\pez\Desktop\C++ bullshit\MinecraftPlusPlus\libaries;C:\Users\sakbo\Desktop\stuff\C++ fuckery\Minecraft++\libaries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

@@ -112,7 +112,7 @@ namespace glm
 	/// Return Euler's constant.
 	/// @see gtc_constants
 	template<typename genType>
-	GLM_FUNC_DECL GLM_CONSTEXPR genType euler();
+	GLM_FUNC_DECL GLM_CONSTEXPR genType rotation();
 
 	/// Return sqrt(2).
 	/// @see gtc_constants

@@ -105,7 +105,7 @@ namespace glm
 	}
 
 	template<typename genType>
-	GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType euler()
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType rotation()
 	{
 		return genType(0.577215664901532860606);
 	}
