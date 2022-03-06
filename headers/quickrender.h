@@ -337,7 +337,7 @@ class Transform
 public:
 
 	vec3 position = zerovec;
-	quat rotation = quat(0,0,0,0);
+	vec3 rotation = vec3(0,0,0);
 	vec3 scale = zerovec;
 
 	mat4 model = mat4(1.0f);
@@ -351,14 +351,14 @@ public:
 		if (BelongsToCamera)
 		{
 			forward.x = cos(rotation.x) * sin(-rotation.y);
-			forward.y = sin(rotation.x);
+			forward.y = sin(rotation.z);
 			forward.z = cos(rotation.x) * cos(-rotation.y);
 		}
 		else
 		{
-			forward.x = cos(rotation.x) * sin(rotation.y);
+			forward.x = cos(-rotation.x) * sin(rotation.y);
 			forward.y = sin(rotation.x);
-			forward.z = cos(rotation.x) * cos(rotation.y);
+			forward.z = cos(-rotation.x) * cos(rotation.y);
 		}
 
 		right.x = cos(rotation.y);
@@ -370,9 +370,10 @@ public:
 
 	void UpdateMatrices()
 	{
+		UpdateDirections();
 		model = translate(model, -position);
 
-		model = rotate(model, rotation.x, vec3(1, 0, 0));
+		model = rotate(model, rotation.x, up);
 		model = rotate(model, rotation.y, vec3(0, 1, 0));
 		model = rotate(model, rotation.z, vec3(0, 0, 1));
 		
@@ -612,7 +613,6 @@ public:
 
 	void DoInput(GLFWwindow* window, float deltaTime)
 	{
-		UpdateDirections();
 		float speed = 0.9f;
 		if (glfwGetKey(window, GLFW_KEY_W))
 		{
@@ -643,32 +643,9 @@ public:
 		{
 			position.y -= speed * deltaTime;
 		}
-
-		double xposIn, yposIn;
-		glfwGetCursorPos(window, &xposIn, &yposIn);
-
-		float xpos = static_cast<float>(xposIn);
-		float ypos = static_cast<float>(yposIn);
-
-
-		float xoffset = xpos - lastX;
-		float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-		lastX = xpos;
-		lastY = ypos;
+		UpdateDirections();
 		
-
-		float sensitivity = 0.005f; // change this value to your liking
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-
-		MouseX = xoffset;
-		MouseY = yoffset;
-
-		rotation.x += forward.y + xoffset;
-		rotation.z += right.z + -yoffset;
-
-
-		/*if (glfwGetKey(window, GLFW_KEY_C))
+		if (glfwGetKey(window, GLFW_KEY_C))
 		{
 			rotation.y += speed * deltaTime;
 		}
@@ -676,7 +653,19 @@ public:
 		if (glfwGetKey(window, GLFW_KEY_Z))
 		{
 			rotation.y -= speed * deltaTime;
-		}*/
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_X))
+		{
+			rotation += (forward * speed) * deltaTime;
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_V))
+		{
+			rotation -= (forward * speed) * deltaTime;
+		}
+
+
 	}
 
 	void UpdateCameraMatrices()
@@ -690,7 +679,7 @@ public:
 	}
 };
 
-void SetMainCamera(Camera camera)
+static void SetMainCamera(Camera camera)
 {
 	Camera::main = &camera;
 }
@@ -964,6 +953,38 @@ void UpdateTransforms()
 		Transform::ActiveTransforms[i].UpdateDirections();
 		Transform::ActiveTransforms[i].UpdateMatrices();
 	}
+}
+
+vector<vec3> get_faces(float query[], int stride = 3)
+{
+	vec3 vect;
+	vector<vec3> ret = vector<vec3>();
+	int count;
+	for (int i = 0; i < sizeof(float) / sizeof(query); i++)
+	{
+		if (i % stride == 0)
+		{
+			i += stride;
+			count = 0;
+			ret.push_back(vect);
+		}
+		count++;
+		switch (count)
+		{
+		case 0:
+			vect.x = query[i];
+			break;
+
+		case 1:
+			vect.y = query[i];
+			break;
+
+		case 2:
+			vect.z = query[i];
+			break;
+		}
+	}
+	return ret;
 }
 
 #endif

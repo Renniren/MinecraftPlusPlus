@@ -17,6 +17,7 @@ int main()
 	vector<Block*> world = vector<Block*>();
 	Block* gen;
 
+	printf("%d", get_faces((float*)block2->cube->VBO->data, 5));
 	cout << world.size() << endl;
 	cout << world.size() << endl;
 	while (!glfwWindowShouldClose(window))

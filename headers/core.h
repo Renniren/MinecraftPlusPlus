@@ -71,6 +71,8 @@ public:
 vector<WorldObject> WorldObject::ActiveObjects = vector<WorldObject>();
 
 vector<Block*> Block::ActiveBlocks = vector<Block*>();
+
+
 void UpdateWorldObjects()
 {
 	for (int i = 0; i < WorldObject::ActiveObjects.size(); i++)
