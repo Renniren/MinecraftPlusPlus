@@ -244,6 +244,12 @@ void MouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 	
 }
 
+float dist(vec3 a, vec3 b)
+{
+	double num = pow(b.x - a.x, 2) + pow(b.y - a.y, 2) + pow(b.z - a.z, 2);
+	return sqrt(num);
+}
+
 void MSetupMemoryChecks()
 {
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
@@ -451,7 +457,7 @@ public:
 	vector<Shader> linkedShaders;
 	bool initialized;
 
-	void InitializeProgram(vector<Shader> shaders)
+	void InitializeProgram(const vector<Shader>& shaders)
 	{
 		if (initialized)
 		{
@@ -474,7 +480,7 @@ public:
 		glUseProgram(this->id);
 	}
 
-	void setFloat(const string name, const float& number) const
+	void setFloat(const string& name, const float& number) const
 	{
 		glUseProgram(id);
 		glUniform1f(glGetUniformLocation(this->id, name.c_str()), number);
@@ -542,9 +548,8 @@ public:
 		data = nullptr;
 	}
 
-	void Generate(int size, GLenum buffer) 
+	void Generate(GLenum buffer) 
 	{
-		this->size = size;
 		this->buffer = buffer;
 		glGenBuffers(1, &this->id);
 	}
@@ -679,7 +684,7 @@ public:
 	}
 };
 
-static void SetMainCamera(Camera camera)
+static void SetMainCamera(Camera& camera)
 {
 	Camera::main = &camera;
 }
@@ -695,13 +700,25 @@ void ApplyPerspective(Camera source, ShaderProgram pro, Transform obj)
 	pro.setMat4("model", obj.model);
 }
 
+class drawable
+{
+public:
+	int order;
+	VertexArrayObject vao;
+	ShaderProgram program;
+	Transform transform;
+	BufferObject buffer;
+	drawable* db = this;
+};
+
 class Renderer
 {
 private:
 	Renderer(){}
 
 public:
-	static void Draw(VertexArrayObject va, ShaderProgram pro, BufferObject bo, Transform wo)
+	
+	static void Draw(VertexArrayObject& va, ShaderProgram& pro, BufferObject& bo, Transform& wo)
 	{
 		va.Bind();
 		bo.Bind(bo.buffer);
@@ -719,7 +736,32 @@ public:
 		ResetState();
 	}
 
+	static void Draw(drawable d)
+	{
+		static drawable draws[8192];
+		
+		if (&draws[d.order] != nullptr)
+		{
+			if (d.order + 1 < 512) d.order += 1;
+		}
+
+		draws[d.order] = d;
+		drawable* dptr = &draws[0];
+		for (int i = 0; i < 8192; i++)
+		{
+			if (&draws[i] == nullptr)
+			{
+				continue;
+			}
+
+			Draw(draws[i].vao, draws[i].program, draws[i].buffer, draws[i].transform);
+			dptr++;
+		}
+	}
+
 };
+
+
 
 class VertexAttribute
 {
@@ -817,7 +859,7 @@ public:
 	Shader VertShader = Shader(vertexShaderSource, GL_VERTEX_SHADER), FragShader = Shader(fragmentShaderSource, GL_FRAGMENT_SHADER);
 	ShaderProgram shaderProgram = ShaderProgram();
 	Texture* texture;
-
+	drawable drawinfo;
 
 	void Initialize(int mode = 0)
 	{
@@ -837,7 +879,7 @@ public:
 			VAO->Generate(1);
 			VAO->Bind();
 
-			VBO->Generate(sizeof(PRIMITIVE_CUBE), GL_ARRAY_BUFFER);
+			VBO->Generate(GL_ARRAY_BUFFER);
 			VBO->Bind(GL_ARRAY_BUFFER);
 			VBO->Copy(GL_ARRAY_BUFFER, PRIMITIVE_CUBE, sizeof(PRIMITIVE_CUBE), GL_STATIC_DRAW);
 
@@ -846,10 +888,39 @@ public:
 			VertexAttribute(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float));
 			VertexAttribute(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (3 * sizeof(float)));
 
+			
+
 			this->scale = onevec;
 			PrintErrors();
 			ResetState();
 		}
+		
+		if (mode == 1)
+		{
+			VertShader.CreateShader();
+			VertShader.LinkCodeWithPath(SHADERS_DIRECTORY + string("vertexTextured.glsl"));
+			VertShader.Compile();
+
+			FragShader.CreateShader();
+			FragShader.LinkCodeWithPath(SHADERS_DIRECTORY + string("fragmentTextured.glsl"));
+			FragShader.Compile();
+
+			shaderProgram.InitializeProgram({ VertShader, FragShader });
+			shaderProgram.setVec4("color", vec4(1));
+
+			VAO->Generate(1);
+			VAO->Bind();
+			texture = LoadTexture(TEXTURES_DIRECTORY + string("dirt.jpg"), GL_TEXTURE_2D);
+
+			this->scale = onevec;
+			PrintErrors();
+			ResetState();
+		}
+
+		drawinfo.vao = *VAO;
+		drawinfo.buffer = *VBO;
+		drawinfo.program = shaderProgram;
+		drawinfo.transform = *((Transform*)this);
 	}
 
 	void Draw(int mode = 0)
@@ -903,7 +974,7 @@ public:
 			VAO->Generate(1);
 			VAO->Bind();
 
-			VBO->Generate(sizeof(vertices), GL_ARRAY_BUFFER);
+			VBO->Generate(GL_ARRAY_BUFFER);
 			VBO->Bind(GL_ARRAY_BUFFER);
 			VBO->Copy(GL_ARRAY_BUFFER, vertices, sizeof(vertices), GL_STATIC_DRAW);
 
@@ -931,6 +1002,31 @@ public:
 	}
 };
 
+struct Light
+{
+	static vector<Light*> Lights;
+	vec3 position;
+	vec3 color;
+	float range;
+	float intensity;	
+	float specularIntensity;
+	bool enabled, castShadows;
+	
+	Light(vec3 at, vec3 color, float range, float intensity, float specint, bool shadows = true)
+	{
+		this->position = at;
+		this->color = color;
+		this->range = range;
+		this->intensity = intensity;
+		this->specularIntensity = specint;
+		this->castShadows = shadows;
+		this->enabled = true;
+
+		Lights.push_back(this);
+	}
+};
+
+vector<Light*> Light::Lights = vector<Light*>();
 vector<GLObject> GLObject::objects = vector<GLObject>();
 vector<Transform> Transform::ActiveTransforms = vector<Transform>();
 
@@ -960,7 +1056,7 @@ vector<vec3> get_faces(float query[], int stride = 3)
 	vec3 vect;
 	vector<vec3> ret = vector<vec3>();
 	int count;
-	for (int i = 0; i < sizeof(float) / sizeof(query); i++)
+	for (int i = 0; i < sizeof(query) / sizeof(query[0]); i++)
 	{
 		if (i % stride == 0)
 		{
@@ -973,15 +1069,11 @@ vector<vec3> get_faces(float query[], int stride = 3)
 		{
 		case 0:
 			vect.x = query[i];
-			break;
 
 		case 1:
 			vect.y = query[i];
-			break;
-
 		case 2:
 			vect.z = query[i];
-			break;
 		}
 	}
 	return ret;

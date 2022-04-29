@@ -3,9 +3,9 @@
 #define SHITCRAFT_CORE
 
 template<typename T>
-T* Instantiate(T* to)
+inline T* Instantiate(T* to)
 {
-	T* n = to;
+	T* n = new T();
 	return n;
 }
 
@@ -42,29 +42,54 @@ public:
 	}
 };
 
+class TestTriangle : public drawable
+{
+
+};
+
 class Block : public WorldObject
 {
 protected:
 
 public:
 	Cube* cube;
+	//vector<vec3> faces;
 	static vector<Block*> ActiveBlocks;
+
+	bool active = true;
+	bool draw = true;
+	bool doDist = true;
+	bool dynamic = false;
+
+	int parentChunk;
 
 	void Start()
 	{
 		
 	}
 
-	Block()
+	Block(bool draw = true, bool forChunk = false)
 	{
 		cube = new Cube();
-		cube->Initialize();
+		this->draw = draw;
+		if (forChunk)
+		{
+			cube->Initialize(1);
+		}
+		else
+		{
+			cube->Initialize(0);
+		}
 		ActiveBlocks.push_back(this);
 	}
 
 	void Update()
 	{
-		cube->Draw(1);
+		if(active && draw) cube->Draw(1);
+		if (glfwGetKey(window, GLFW_KEY_Y))
+		{
+			cout << dist(cube->position, Camera::main->position) << endl;
+		}
 	}
 };
 
@@ -85,7 +110,7 @@ void UpdateBlocks()
 {
 	for (int i = 0; i < Block::ActiveBlocks.size(); i++)
 	{
-		Block::ActiveBlocks[i]->Update();
+		if(Block::ActiveBlocks[i] != nullptr) Block::ActiveBlocks[i]->Update();
 	}
 }
 

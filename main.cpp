@@ -1,7 +1,8 @@
 #include<shitcraft.h>
 
 bool generated;
-int WORLD_SIZE = 4;
+int WORLD_SIZE = 15;
+int WORLD_HEIGHT = 3;
 int main()
 {
 	window = glSetup();
@@ -10,16 +11,13 @@ int main()
 	
 	cam->position = vec3(0, 0, 5);
 
-	Block* block = Instantiate(new Block);
-	Block* block2 = Instantiate(new Block);
-	block2->cube->position = vec3(0, 0, 1);
 
 	vector<Block*> world = vector<Block*>();
+	Chunk* chunk = new Chunk();
 	Block* gen;
+	vector<Block> blocks = vector<Block>();
+	int count = 0;
 
-	printf("%d", get_faces((float*)block2->cube->VBO->data, 5));
-	cout << world.size() << endl;
-	cout << world.size() << endl;
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -27,25 +25,38 @@ int main()
 		UpdateDeltaTime();
 		UpdateTransforms();
 		cam->DoInput(window, deltaTime);
+		//test->cube->position = -cam->position;
 
 		if (!generated)
 		{
-			for (int x = 0; x < WORLD_SIZE; x++)
+			for (int x = 0; x <= WORLD_SIZE; x++)
 			{
-				for (int y = 0; y < WORLD_SIZE; y++)
+				for (int y = 0; y <= WORLD_HEIGHT; y++)
 				{
-					for (int z = 0; z < WORLD_SIZE; z++)
+					for (int z = 0; z <= WORLD_SIZE; z++)
 					{
-						gen = new Block();
+						count += x;
+						if ((count) > Chunk::MaximumChunkSize)
+						{
+							(new Chunk())->init(blocks);
+							blocks.clear();
+							count = 0;
+						}
+
+						gen = new Block(false, true);
 						gen->cube->position = vec3(x, y, z);
-						world.push_back(gen);
+						gen->doDist = false;
+						gen->draw = true;
+						blocks.push_back(*gen);
 					}
 				}
 			}
+			
 			generated = true;
 		}
-
-		UpdateBlocks();
+		//chunk->Draw();
+		//UpdateBlocks();
+		UpdateChunks();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
