@@ -12,13 +12,18 @@ public:
 	VertexArrayObject vao;
 	Triangle debug;
 
-	vector<Block> blocks;
+	vector<Block> blocks = vector<Block>();
 
 	static vector<Chunk*> Chunks;
 	static int MaximumChunkSize;
 
 	vec3 center;
 	int id; //Represent each chunk with an int in order to make it easier to link blocks to chunks.
+
+	Chunk()
+	{
+		id = Chunks.size();
+	}
 
 	void regenchunk()
 	{

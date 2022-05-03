@@ -94,6 +94,7 @@ int main()
 							chunk = new Chunk();
 							made_first_chunk = true;
 						}
+						
 
 						gen = new Block(false, true);
 						gen->parentChunk = chunk->id;
@@ -101,21 +102,19 @@ int main()
 						gen->doDist = false;
 						gen->draw = false;
 
-						for (size_t i = WORLD_MINIMUM_Y; i < gen->cube->position.y; i++)
+						int pos = (int)(y + WORLD_OFFSET) + map[x][y][z], posx = (int)gen->cube->position.x, posz = (int)gen->cube->position.z;
+						cout << "YPosition = " << pos << endl;
+						for (size_t i = WORLD_MINIMUM_Y; i < pos; i++)
 						{
-							/*gen = new Block(true, false);
-							gen->cube->position = vec3(world[i]->cube->position.x, x, world[i]->cube->position.z);
+							cout << "In other loop" << endl;
+							gen = new Block(true, false);
+							gen->cube->position = vec3(posx, i, posz);
 							gen->doDist = false;
-							gen->draw = false;
+							gen->draw = true;
 							world.push_back(gen);
-							blocks.push_back(*gen);*/
+							blocks.push_back(*gen);
 						}
 
-						if (gen->cube->position.y < WORLD_MINIMUM_Y || gen->cube->position.y == -8.58993e+08)
-						{
-							std::cout << "fuck off" << endl; //I still have no clue why this even happens.
-							gen->cube->position.y = WORLD_MINIMUM_Y;
-						}
 						world.push_back(gen);
 						blocks.push_back(*gen);
 					}

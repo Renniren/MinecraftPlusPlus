@@ -68,7 +68,7 @@ public:
 		
 	}
 
-	Block(bool draw = true, bool forChunk = false)
+	Block(bool draw = true, bool forChunk = true, int parent = 0)
 	{
 		cube = new Cube();
 		this->draw = draw;
@@ -90,7 +90,7 @@ public:
 		{
 			if (dist(cube->position, Camera::main->position) < 1)
 			{
-				cout << "hello from ";
+				cout << "hello from Block " << parentChunk;
 				printvec3(cube->position);
 				cout << endl;
 			}
