@@ -246,7 +246,6 @@ void ViewResizeCallback(GLFWwindow* window, int w, int h)
 }
 
 float MouseX, MouseY;
-
 float lastX, lastY;
 bool firstMouse = true;
 
@@ -259,16 +258,6 @@ void MouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 inline float dist(vec3 a, vec3 b)
 {
 	return sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2) + pow(b.z - a.z, 2));
-}
-
-void MSetupMemoryChecks()
-{
-	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG);
-}
-
-void MCheckMemory()
-{
-	_CrtDumpMemoryLeaks();
 }
 
 GLFWwindow* glSetup()
@@ -354,7 +343,7 @@ class Transform
 public:
 
 	vec3 position = zerovec;
-	vec3 rotation = vec3(0,0,0);
+	quat rotation = quat(0,0,0,0);
 	vec3 scale = zerovec;
 
 	mat4 model = mat4(1.0f);
@@ -370,16 +359,6 @@ public:
 
 	void UpdateDirections()
 	{
-
-		/*vec3 direction(cos(rotation.x) * sin(rotation.z), sin(rotation.y), cos(rotation.x) * sin(rotation.z));
-
-		right = vec3(sin(rotation.x - PI / 2), 0, cos(rotation.y - PI / 2));
-
-		forward = direction;
-
-		up = cross(right, direction);*/
-
-
 		if (BelongsToCamera)
 		{
 			forward.x = cos(rotation.x) * sin(-rotation.y);
@@ -398,7 +377,6 @@ public:
 		right.z = sin(rotation.y);
 
 		up = cross(forward, right);
-		
 	}
 
 	void UpdateMatrices()
@@ -407,16 +385,16 @@ public:
 		if (BelongsToCamera)
 		{
 			model = translate(model, position);
-			model = rotate(model, -rotation.x, up);
-			model = rotate(model, -rotation.y, vec3(0, 1, 0));
-			model = rotate(model, -rotation.z, vec3(0, 0, 1));
+			model = rotate(model, rotation.x, right);
+			model = rotate(model, rotation.y, up);
+			model = rotate(model, rotation.z, forward);
 		}
 		else                                       
 		{
 			model = translate(model, position);
-			model = rotate(model, rotation.x, up);
-			model = rotate(model, rotation.y, vec3(0, 1, 0));
-			model = rotate(model, rotation.z, vec3(0, 0, 1));
+			model = rotate(model, rotation.x, right);
+			model = rotate(model, rotation.y, up);
+			model = rotate(model, rotation.z, forward);
 		}
 		
 		model = glm::scale(model, scale);
@@ -615,16 +593,13 @@ public:
 
 class Camera : public Transform
 {
-protected:
-
 public:
 	enum projectionMode { Perspective, Orthographic };
 	float FieldOfView = 90, FarClip = 1000, NearClip = 0.01f;
-	projectionMode ProjectionMode = projectionMode::Perspective;
+	Camera::projectionMode ProjectionMode = Camera::projectionMode::Perspective;
 	
 	mat4 view = mat4(1), projection = mat4(1);
 
-	static Camera* main;
 
 	Camera() 
 	{
@@ -684,6 +659,7 @@ public:
 		{
 			position.y -= speed * deltaTime;
 		}
+
 		UpdateDirections();
 		
 		if (glfwGetKey(window, GLFW_KEY_C))
@@ -698,24 +674,31 @@ public:
 
 		if (glfwGetKey(window, GLFW_KEY_X))
 		{
-			rotation += (forward * speed) * deltaTime;
+			rotation.z += speed * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_V))
 		{
-			rotation -= (forward * speed) * deltaTime;
+			rotation.z -= speed* deltaTime;
 		}
 	}
 
 	void UpdateCameraMatrices()
 	{
-		view = rotate(view, rotation.x, vec3(0, 0, 1));
+		/*view = rotate(view, rotation.x, vec3(0, 0, 1));
 		view = rotate(view, rotation.y, vec3(0, 1, 0));
-		view = rotate(view, rotation.z, vec3(1, 0, 0));
-
+		view = rotate(view, rotation.z, vec3(1, 0, 0));*/
+		UpdateDirections();
+		view = rotate(view, rotation.x, right);
+		view = rotate(view, rotation.y, up);
+		view = rotate(view, rotation.z, forward);
 		view = translate(view, -position); // Negate position so that raw coordinates better align with what's actually being rendered.
+
+
 		projection = perspective(radians(FieldOfView), float((width * 0.75) / (height * 0.75)), NearClip, FarClip);
 	}
+
+	static Camera* main;
 };
 
 static void SetMainCamera(Camera& camera)
@@ -723,7 +706,7 @@ static void SetMainCamera(Camera& camera)
 	Camera::main = &camera;
 }
 
-void ApplyPerspective(Camera source, ShaderProgram pro, Transform obj)
+void ApplyPerspective(Camera source, ShaderProgram& pro, Transform obj)
 {
 	pro.UseProgram();
 	obj.UpdateMatrices();
