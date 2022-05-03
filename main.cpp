@@ -6,10 +6,6 @@ const int WORLD_OFFSET = 0;
 const int WORLD_HEIGHT = 3;
 const int WORLD_MINIMUM_Y = -5;
 
-inline void printvec3(vec3 op)
-{
-	cout << "(" << op.x << ", " << op.y << ", " << op.z << ")" << endl;
-}
 
 int main()
 {
@@ -54,8 +50,10 @@ int main()
 
 		if (glfwGetKey(window, GLFW_KEY_T))
 		{
-			std::cout << cam->position.y << endl;
-			std::cout << world.size() << endl;
+			std::cout << "Camera Position: ";
+			printvec3(cam->position);
+			std::cout << std::endl;
+			std::cout << "Blocks: " << world.size() << endl;
 		}
 
 		bool made_first_chunk = false;

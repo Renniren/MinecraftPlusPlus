@@ -90,7 +90,9 @@ public:
 		{
 			if (dist(cube->position, Camera::main->position) < 1)
 			{
-				cout << "hello" << endl;
+				cout << "hello from ";
+				printvec3(cube->position);
+				cout << endl;
 			}
 		}
 	}

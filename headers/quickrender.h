@@ -149,6 +149,12 @@ const char* fragmentShaderSource =
 using namespace std;
 using namespace glm;
 
+inline void printvec3(vec3 op)
+{
+	cout << "(" << op.x << ", " << op.y << ", " << op.z << ")" << endl;
+}
+
+
 char* GetWorkingDirectory()
 {
 	char cCurrentPath[FILENAME_MAX];
@@ -216,7 +222,7 @@ float PRIMITIVE_TRIANGLE[] = {
 };
 #endif
 
-void ResetState()
+inline void ResetState()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_1D, 0);
@@ -227,7 +233,7 @@ void ResetState()
 	glBindVertexArray(0);
 }
 
-vec3 InvertYPosition(vec3 op)
+inline vec3 InvertYPosition(vec3 op)
 {
 	return vec3(op.x, -op.y, op.z);
 }
@@ -250,10 +256,9 @@ void MouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 	
 }
 
-float dist(vec3 a, vec3 b)
+inline float dist(vec3 a, vec3 b)
 {
-	float num = pow(b.x - a.x, 2) + pow(b.y - a.y, 2) + pow(b.z - a.z, 2);
-	return sqrt(num);
+	return sqrt(pow(b.x - a.x, 2) + pow(b.y - a.y, 2) + pow(b.z - a.z, 2));
 }
 
 void MSetupMemoryChecks()
@@ -356,7 +361,7 @@ public:
 
 	vec3 forward = zerovec, right = zerovec, up = zerovec;
 	
-	bool BelongsToCamera;
+	bool BelongsToCamera = false;
 
 	Transform()
 	{
@@ -401,12 +406,12 @@ public:
 		UpdateDirections();
 		if (BelongsToCamera)
 		{
-			model = translate(model, -position);
-			model = rotate(model, rotation.x, up);
-			model = rotate(model, rotation.y, vec3(0, 1, 0));
-			model = rotate(model, rotation.z, vec3(0, 0, 1));
+			model = translate(model, position);
+			model = rotate(model, -rotation.x, up);
+			model = rotate(model, -rotation.y, vec3(0, 1, 0));
+			model = rotate(model, -rotation.z, vec3(0, 0, 1));
 		}
-		else
+		else                                       
 		{
 			model = translate(model, position);
 			model = rotate(model, rotation.x, up);
@@ -652,32 +657,32 @@ public:
 		float speed = 1.9f;
 		if (glfwGetKey(window, GLFW_KEY_W))
 		{
-			position += (forward * speed) * deltaTime;
+			position -= (forward * speed) * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_S))
 		{
-			position -= (forward * speed) * deltaTime;
+			position += (forward * speed) * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_A))
 		{
-			position += (right * speed) * deltaTime;
+			position -= (right * speed) * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_D))
 		{
-			position -= (right * speed) * deltaTime;
+			position += (right * speed) * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_E))
 		{
-			position.y -= speed * deltaTime;
+			position.y += speed * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_Q))
 		{
-			position.y += speed * deltaTime;
+			position.y -= speed * deltaTime;
 		}
 		UpdateDirections();
 		
@@ -704,11 +709,11 @@ public:
 
 	void UpdateCameraMatrices()
 	{
-		view = rotate(view, -rotation.x, vec3(0, 0, 1));
-		view = rotate(view, -rotation.y, vec3(0, 1, 0));
-		view = rotate(view, -rotation.z, vec3(1, 0, 0));
+		view = rotate(view, rotation.x, vec3(0, 0, 1));
+		view = rotate(view, rotation.y, vec3(0, 1, 0));
+		view = rotate(view, rotation.z, vec3(1, 0, 0));
 
-		view = translate(view, InvertYPosition(position));
+		view = translate(view, -position); // Negate position so that raw coordinates better align with what's actually being rendered.
 		projection = perspective(radians(FieldOfView), float((width * 0.75) / (height * 0.75)), NearClip, FarClip);
 	}
 };
