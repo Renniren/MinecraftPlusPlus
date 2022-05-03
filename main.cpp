@@ -25,7 +25,8 @@ int main()
 	int countx = 0, countz = 0;
 
 	
-	int map[WORLD_SIZE][WORLD_HEIGHT][WORLD_SIZE];
+	std::cout << "Generating noise map..." << endl;
+	int map[WORLD_SIZE + 1][WORLD_HEIGHT + 1][WORLD_SIZE + 1];
 	for (size_t x = 0; x < WORLD_SIZE; x++)
 	{
 		for (size_t z = 0; z < WORLD_SIZE; z++)
@@ -33,6 +34,18 @@ int main()
 			for (size_t y = 0; y < WORLD_HEIGHT; y++)
 			{
 				map[x][y][z] = (int)(rand() % 5);
+			}
+		}
+	}
+
+	std::cout << "Fixing noise map artifacts..." << endl;
+	for (size_t x = 0; x < WORLD_SIZE; x++)
+	{
+		for (size_t z = 0; z < WORLD_SIZE; z++)
+		{
+			for (size_t y = 0; y < WORLD_HEIGHT; y++)
+			{
+				if (map[x][y][z] == -8.58993e+08 || map[x][y][z] < WORLD_MINIMUM_Y) map[x][y][z] = WORLD_MINIMUM_Y;
 			}
 		}
 	}
@@ -61,11 +74,11 @@ int main()
 		//Pretty inefficient. Don't know a better way to do it though.
 		if (!generated)
 		{
-			for (int x = 0; x <= WORLD_SIZE; x++)
+			for (size_t x = 0; x < WORLD_SIZE; x++)
 			{
-				for (int z = 0; z <= WORLD_SIZE; z++)
+				for (size_t z = 0; z < WORLD_SIZE; z++)
 				{
-					for (int y = 0; y <= WORLD_HEIGHT; y++)
+					for (size_t y = 0; y < WORLD_HEIGHT; y++)
 					{
 						//y += sin(y) * 2;
 						countx++;
@@ -84,7 +97,7 @@ int main()
 
 						gen = new Block(false, true);
 						gen->parentChunk = chunk->id;
-						gen->cube->position = vec3(x, (y + WORLD_OFFSET) + map[x][y][z], z);
+						gen->cube->position = vec3(x, (y + WORLD_OFFSET) + map[x][y][z], z); //Perhaps using pure integers here wasn't a good idea?
 						gen->doDist = false;
 						gen->draw = false;
 
@@ -100,7 +113,7 @@ int main()
 
 						if (gen->cube->position.y < WORLD_MINIMUM_Y || gen->cube->position.y == -8.58993e+08)
 						{
-							std::cout << "fuck off" << endl;
+							std::cout << "fuck off" << endl; //I still have no clue why this even happens.
 							gen->cube->position.y = WORLD_MINIMUM_Y;
 						}
 						world.push_back(gen);
@@ -109,6 +122,8 @@ int main()
 				}
 			}
 			std::cout << "Generated world." << endl;
+			std::cout << Chunk::Chunks.size() << " total chunks." << endl;
+			std::cout << world.size() << " total blocks." << endl;
 			cam->position = world[0]->cube->position;
 
 			//std::cout << "Offsetting blocks..." << endl;
