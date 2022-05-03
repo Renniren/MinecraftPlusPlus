@@ -405,6 +405,30 @@ public:
 	static vector<Transform> ActiveTransforms;
 };
 
+struct Light
+{
+	static vector<Light*> Lights;
+	vec3 position;
+	vec3 color;
+	float range;
+	float intensity;
+	float specularIntensity;
+	bool enabled, castShadows;
+
+	Light(vec3 at, vec3 color, float range, float intensity, float specint, bool shadows = true)
+	{
+		this->position = at;
+		this->color = color;
+		this->range = range;
+		this->intensity = intensity;
+		this->specularIntensity = specint;
+		this->castShadows = shadows;
+		this->enabled = true;
+
+		Lights.push_back(this);
+	}
+};
+
 class Shader : public GLObject
 {
 public:
@@ -488,7 +512,6 @@ public:
 		initialized = true;
 	}
 
-
 	void UseProgram() const
 	{
 		glUseProgram(this->id);
@@ -504,6 +527,17 @@ public:
 	{
 		glUseProgram(id);
 		glUniform4f(glGetUniformLocation(this->id, name.c_str()), (GLfloat)vect.x, (GLfloat)vect.y, (GLfloat)vect.z, (GLfloat)vect.w);
+	}
+
+	void setVec3(const string& name, const vec3& vect) const
+	{
+		glUseProgram(id);
+		glUniform3f(glGetUniformLocation(this->id, name.c_str()), (GLfloat)vect.x, (GLfloat)vect.y, (GLfloat)vect.z);
+	}
+
+	void setLight(const Light& light)
+	{
+		
 	}
 
 	void setMat4(const string& name, const glm::mat4& mat) const
@@ -726,56 +760,6 @@ public:
 	Transform transform;
 	BufferObject buffer;
 	drawable* db = this;
-};
-
-class Renderer
-{
-private:
-	Renderer(){}
-
-public:
-	
-	static void Draw(VertexArrayObject& va, ShaderProgram& pro, BufferObject& bo, Transform& wo)
-	{
-		va.Bind();
-		bo.Bind(bo.buffer);
-		pro.UseProgram();
-		if (Camera::main == nullptr)
-		{
-			cout << "Main camera is either unassigned or has been destroyed - cannot draw this object." << endl;
-			panic
-			return;
-		}
-
-		ApplyPerspective(*Camera::main, pro, wo);
-
-		glDrawArrays(GL_TRIANGLES, 0, bo.size);
-		ResetState();
-	}
-
-	static void Draw(drawable d)
-	{
-		static drawable draws[8192];
-		
-		if (&draws[d.order] != nullptr)
-		{
-			if (d.order + 1 < 512) d.order += 1;
-		}
-
-		draws[d.order] = d;
-		drawable* dptr = &draws[0];
-		for (int i = 0; i < 8192; i++)
-		{
-			if (&draws[i] == nullptr)
-			{
-				continue;
-			}
-
-			Draw(draws[i].vao, draws[i].program, draws[i].buffer, draws[i].transform);
-			dptr++;
-		}
-	}
-
 };
 
 class VertexAttribute
@@ -1017,29 +1001,7 @@ public:
 	}
 };
 
-struct Light
-{
-	static vector<Light*> Lights;
-	vec3 position;
-	vec3 color;
-	float range;
-	float intensity;	
-	float specularIntensity;
-	bool enabled, castShadows;
-	
-	Light(vec3 at, vec3 color, float range, float intensity, float specint, bool shadows = true)
-	{
-		this->position = at;
-		this->color = color;
-		this->range = range;
-		this->intensity = intensity;
-		this->specularIntensity = specint;
-		this->castShadows = shadows;
-		this->enabled = true;
 
-		Lights.push_back(this);
-	}
-};
 
 vector<Light*> Light::Lights = vector<Light*>();
 vector<GLObject> GLObject::objects = vector<GLObject>();
@@ -1047,6 +1009,65 @@ vector<Transform> Transform::ActiveTransforms = vector<Transform>();
 
 Camera* Camera::main = nullptr;
 GLFWwindow* window;
+
+class Renderer
+{
+private:
+	Renderer(){}
+
+public:
+	
+	static void Draw(VertexArrayObject& va, ShaderProgram& pro, BufferObject& bo, Transform& wo, bool lit = true)
+	{
+		va.Bind();
+		bo.Bind(bo.buffer);
+		pro.UseProgram();
+		if (Camera::main == nullptr)
+		{
+			cout << "Main camera is either unassigned or has been destroyed - cannot draw this object." << endl;
+			panic
+			return;
+		}
+
+		ApplyPerspective(*Camera::main, pro, wo);
+
+		if (lit)
+		{
+			//pro.setVec3("lightPos")
+			for (size_t i = 0; i < Light::Lights.size(); i++)
+			{
+
+			}
+		}
+
+		glDrawArrays(GL_TRIANGLES, 0, bo.size);
+		ResetState();
+	}
+
+	static void Draw(drawable d)
+	{
+		static drawable draws[8192];
+		
+		if (&draws[d.order] != nullptr)
+		{
+			if (d.order + 1 < 512) d.order += 1;
+		}
+
+		draws[d.order] = d;
+		drawable* dptr = &draws[0];
+		for (int i = 0; i < 8192; i++)
+		{
+			if (&draws[i] == nullptr)
+			{
+				continue;
+			}
+
+			Draw(draws[i].vao, draws[i].program, draws[i].buffer, draws[i].transform);
+			dptr++;
+		}
+	}
+
+};
 
 float deltaTime = 0, lastFrame = 0;
 

@@ -6,9 +6,14 @@ uniform sampler2D tex;
 
 in vec2 TextureCoordinates;
 
-uniform vec3 lightPos, lightColor;
-uniform float lightRange, lightIntensity, lightSpecint;
-uniform bool lightShadows;
+struct Light
+{
+	vec3 pos, color;
+	float range, intensity, specularIntensity;
+	bool useShadows;
+};
+
+uniform Light lights[512];
 
 void main()
 {
