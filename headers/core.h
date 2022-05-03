@@ -61,7 +61,7 @@ public:
 	bool doDist = true;
 	bool dynamic = false;
 
-	int parentChunk;
+	int parentChunk = 0;
 
 	void Start()
 	{
@@ -88,7 +88,10 @@ public:
 		if(active && draw) cube->Draw(1);
 		if (glfwGetKey(window, GLFW_KEY_Y))
 		{
-			cout << dist(cube->position, Camera::main->position) << endl;
+			if (dist(cube->position, Camera::main->position) < 1)
+			{
+				cout << "hello" << endl;
+			}
 		}
 	}
 };

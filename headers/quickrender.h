@@ -26,6 +26,7 @@
 
 #define pragmatism __debugbreak(); 
 #define panic __debugbreak();
+#define PI 3.14f
 
 #define uint unsigned int
 #define onevec vec3(1,1,1)
@@ -226,6 +227,11 @@ void ResetState()
 	glBindVertexArray(0);
 }
 
+vec3 InvertYPosition(vec3 op)
+{
+	return vec3(op.x, -op.y, op.z);
+}
+
 void ViewResizeCallback(GLFWwindow* window, int w, int h)
 {
 	width = w;
@@ -246,7 +252,7 @@ void MouseCallback(GLFWwindow* window, double xposIn, double yposIn)
 
 float dist(vec3 a, vec3 b)
 {
-	double num = pow(b.x - a.x, 2) + pow(b.y - a.y, 2) + pow(b.z - a.z, 2);
+	float num = pow(b.x - a.x, 2) + pow(b.y - a.y, 2) + pow(b.z - a.z, 2);
 	return sqrt(num);
 }
 
@@ -352,8 +358,23 @@ public:
 	
 	bool BelongsToCamera;
 
+	Transform()
+	{
+		ActiveTransforms.push_back(*this);
+	}
+
 	void UpdateDirections()
 	{
+
+		/*vec3 direction(cos(rotation.x) * sin(rotation.z), sin(rotation.y), cos(rotation.x) * sin(rotation.z));
+
+		right = vec3(sin(rotation.x - PI / 2), 0, cos(rotation.y - PI / 2));
+
+		forward = direction;
+
+		up = cross(right, direction);*/
+
+
 		if (BelongsToCamera)
 		{
 			forward.x = cos(rotation.x) * sin(-rotation.y);
@@ -372,16 +393,26 @@ public:
 		right.z = sin(rotation.y);
 
 		up = cross(forward, right);
+		
 	}
 
 	void UpdateMatrices()
 	{
 		UpdateDirections();
-		model = translate(model, -position);
-
-		model = rotate(model, rotation.x, up);
-		model = rotate(model, rotation.y, vec3(0, 1, 0));
-		model = rotate(model, rotation.z, vec3(0, 0, 1));
+		if (BelongsToCamera)
+		{
+			model = translate(model, -position);
+			model = rotate(model, rotation.x, up);
+			model = rotate(model, rotation.y, vec3(0, 1, 0));
+			model = rotate(model, rotation.z, vec3(0, 0, 1));
+		}
+		else
+		{
+			model = translate(model, position);
+			model = rotate(model, rotation.x, up);
+			model = rotate(model, rotation.y, vec3(0, 1, 0));
+			model = rotate(model, rotation.z, vec3(0, 0, 1));
+		}
 		
 		model = glm::scale(model, scale);
 	}
@@ -618,46 +649,46 @@ public:
 
 	void DoInput(GLFWwindow* window, float deltaTime)
 	{
-		float speed = 0.9f;
+		float speed = 1.9f;
 		if (glfwGetKey(window, GLFW_KEY_W))
-		{
-			position -= (forward * speed) * deltaTime;
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_S))
 		{
 			position += (forward * speed) * deltaTime;
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_A))
+		if (glfwGetKey(window, GLFW_KEY_S))
 		{
-			position -= (right * speed) * deltaTime;
+			position -= (forward * speed) * deltaTime;
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_D))
+		if (glfwGetKey(window, GLFW_KEY_A))
 		{
 			position += (right * speed) * deltaTime;
 		}
 
+		if (glfwGetKey(window, GLFW_KEY_D))
+		{
+			position -= (right * speed) * deltaTime;
+		}
+
 		if (glfwGetKey(window, GLFW_KEY_E))
 		{
-			position.y += speed * deltaTime;
+			position.y -= speed * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_Q))
 		{
-			position.y -= speed * deltaTime;
+			position.y += speed * deltaTime;
 		}
 		UpdateDirections();
 		
 		if (glfwGetKey(window, GLFW_KEY_C))
 		{
-			rotation.y += speed * deltaTime;
+			rotation.y -= speed * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_Z))
 		{
-			rotation.y -= speed * deltaTime;
+			rotation.y += speed * deltaTime;
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_X))
@@ -669,17 +700,15 @@ public:
 		{
 			rotation -= (forward * speed) * deltaTime;
 		}
-
-
 	}
 
 	void UpdateCameraMatrices()
 	{
-		view = rotate(view, rotation.x, vec3(0, 0, 1));
-		view = rotate(view, rotation.y, vec3(0, 1, 0));
-		view = rotate(view, rotation.z, vec3(1, 0, 0));
+		view = rotate(view, -rotation.x, vec3(0, 0, 1));
+		view = rotate(view, -rotation.y, vec3(0, 1, 0));
+		view = rotate(view, -rotation.z, vec3(1, 0, 0));
 
-		view = translate(view, -position);
+		view = translate(view, InvertYPosition(position));
 		projection = perspective(radians(FieldOfView), float((width * 0.75) / (height * 0.75)), NearClip, FarClip);
 	}
 };
@@ -760,8 +789,6 @@ public:
 	}
 
 };
-
-
 
 class VertexAttribute
 {
